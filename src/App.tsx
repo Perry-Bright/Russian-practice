@@ -1,5 +1,5 @@
 import { AppProvider } from './context';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Config from './pages/Config';
 import Test from './pages/Test';
@@ -9,7 +9,7 @@ import Layout from './components/Layout';
 export default function App() {
   return (
     <AppProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -18,7 +18,7 @@ export default function App() {
             <Route path="/review/:resultId" element={<Review />} />
           </Routes>
         </Layout>
-      </BrowserRouter>
+      </HashRouter>
     </AppProvider>
   );
 }
