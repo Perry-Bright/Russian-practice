@@ -1,0 +1,6 @@
+{
+  "name": "RuExam Prep",
+  "description": "Russian exam practice application for students. Features randomized test questions, timer, auto-scoring, and AI-powered explanations for mistakes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
