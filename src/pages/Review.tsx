@@ -3,6 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { useAppContext } from '../context';
 import { CheckCircle2, XCircle, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { GoogleGenAI } from '@google/genai';
+
+// For a personal project, you can hardcode your key here or use an environment variable
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyA3hJH_dv5O8CjtvvDUQQv8xLHHFcHvZjU";
 
 export default function Review() {
   const { resultId } = useParams();
@@ -62,23 +66,32 @@ function ReviewItem({ question, answer, index }: { question: any, answer: any, i
 
   const fetchExplanation = async () => {
     if (explanation || answer.isCorrect) return;
+
     setLoading(true);
     try {
-      const res = await fetch('/api/explain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: question.text,
-          options: question.options,
-          correctAnswer: question.options[question.correctAnswer],
-          selectedAnswer: answer.selectedAnswerIndex !== null ? question.options[answer.selectedAnswerIndex] : 'No answer selected'
-        })
+      const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+      
+      const prompt = `
+You are a helpful Russian language tutor. 
+A student answered a multiple-choice question incorrectly.
+Question: "${question.text}"
+Options: ${question.options.join(', ')}
+Correct Answer: "${question.options[question.correctAnswer]}"
+Student's Answer: "${answer.selectedAnswerIndex !== null ? question.options[answer.selectedAnswerIndex] : 'No answer selected'}"
+
+Provide a concise explanation in a mix of simple Russian and English (to help an English-speaking learner of Russian) of why "${question.options[question.correctAnswer]}" is correct and why "${answer.selectedAnswerIndex !== null ? question.options[answer.selectedAnswerIndex] : 'No answer selected'}" is wrong. 
+The explanation must be based ONLY on the official correct answer. Keep it under 3 sentences.
+`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
       });
-      const data = await res.json();
-      if (data.explanation) setExplanation(data.explanation);
+
+      if (response.text) setExplanation(response.text);
     } catch (e) {
       console.error(e);
-      setExplanation("Не удалось сгенерировать объяснение.");
+      setExplanation("Не удалось сгенерировать объяснение. Проверьте ваш API ключ и консоль разработчика.");
     } finally {
       setLoading(false);
     }
