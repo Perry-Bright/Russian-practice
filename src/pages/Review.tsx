@@ -5,9 +5,6 @@ import { CheckCircle2, XCircle, ArrowLeft, Loader2, Sparkles } from 'lucide-reac
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from '@google/genai';
 
-// For a personal project, you can hardcode your key here or use an environment variable
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyA3hJH_dv5O8CjtvvDUQQv8xLHHFcHvZjU";
-
 export default function Review() {
   const { resultId } = useParams();
   const { history, questions } = useAppContext();
@@ -69,7 +66,19 @@ function ReviewItem({ question, answer, index }: { question: any, answer: any, i
 
     setLoading(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+      let apiKey = import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('GEMINI_API_KEY');
+      if (!apiKey || apiKey === "AIzaSyA3hJH_dv5O8CjtvvDUQQv8xLHHFcHvZjU") { // exclude the old leaked key
+        apiKey = window.prompt("Пожалуйста, введите ваш новый Gemini API ключ. Он будет сохранен в вашем браузере (localStorage) для будущих сессий:");
+        if (apiKey) {
+          localStorage.setItem('GEMINI_API_KEY', apiKey);
+        } else {
+          setExplanation("Для получения ИИ-объяснений требуется API ключ.");
+          setLoading(false);
+          return;
+        }
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
       
       const prompt = `
 You are a helpful Russian language tutor. 
