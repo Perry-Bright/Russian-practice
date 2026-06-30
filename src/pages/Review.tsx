@@ -84,14 +84,14 @@ The explanation must be based ONLY on the official correct answer. Keep it under
 `;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.5-flash',
         contents: prompt,
       });
 
       if (response.text) setExplanation(response.text);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setExplanation("Не удалось сгенерировать объяснение. Проверьте ваш API ключ и консоль разработчика.");
+      setExplanation(`Не удалось сгенерировать объяснение. Ошибка: ${e.message || 'Неизвестная ошибка'}. Проверьте ваш API ключ и консоль разработчика.`);
     } finally {
       setLoading(false);
     }
